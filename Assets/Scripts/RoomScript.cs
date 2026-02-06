@@ -91,11 +91,11 @@ public class RoomScript : PublicClasses
             staircaseY = Random.Range(1, ROOMSIZEY - 1);
         } while (staircaseX == ROOMSIZEX / 2 && staircaseY == ROOMSIZEY / 2);
 
-        TileGrid[staircaseY * ROOMSIZEY + staircaseX].isStaircase = true;
-        TileGrid[staircaseY * ROOMSIZEY + staircaseX].empty = false;
+        TileGrid[staircaseY * ROOMSIZEX + staircaseX].isStaircase = true;
+        TileGrid[staircaseY * ROOMSIZEX + staircaseX].empty = false;
         if (staircaseSprite != null)
         {
-            TileGrid[staircaseY * ROOMSIZEY + staircaseX].sprite = staircaseSprite;
+            TileGrid[staircaseY * ROOMSIZEX + staircaseX].sprite = staircaseSprite;
         }
         RefreshDisplay();
     }

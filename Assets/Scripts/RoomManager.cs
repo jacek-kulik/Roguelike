@@ -181,9 +181,9 @@ public class RoomManager : PublicClasses
                 Player.GetComponent<PlayerScript>().attachedRoom = rm.room;
                 rm.room.SetActive(true);
 
-                // Place player in center of new room
-                int x = rm.room.GetComponent<RoomScript>().ROOMSIZEX / 2;
-                int y = rm.room.GetComponent<RoomScript>().ROOMSIZEY / 2;
+                // Place player in a corner to avoid spawning on enemy (which spawns at center)
+                int x = 1;
+                int y = 1;
 
                 rm.room.GetComponent<RoomScript>().UpdateTile(x, y, false, true, false, false, Player);
                 Player.GetComponent<PlayerScript>().x = x;
