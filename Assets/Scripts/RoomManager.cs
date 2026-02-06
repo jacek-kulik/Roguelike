@@ -98,9 +98,8 @@ public class RoomManager : PublicClasses
 
     public void GenerateRoom(int x, int y, int floor)
     {
-        // For multiple floors, each floor should only have one room at (0, 0)
-        // Don't allow room generation in other positions on floors > 0
-        if (floor > 0 && (x != 0 || y != 0))
+        // Each floor should only have one room at (0, 0)
+        if (x != 0 || y != 0)
         {
             return;
         }
