@@ -8,6 +8,7 @@ public class RoomScript : PublicClasses
     public int ROOMSIZEY = 7;
 
     public Sprite emptyCellSprite;
+    public Sprite staircaseSprite;
 
     public GameObject TilePrefab;
     public GameObject dangerPrefab;
@@ -31,6 +32,7 @@ public class RoomScript : PublicClasses
         public bool player { get; set; } = false;
         public bool blockade { get; set; } = false;
         public bool inDanger { get; set; } = false;
+        public bool isStaircase { get; set; } = false;
         public int dangerTimer { get; set; } = 0;
         public GameObject attachedObject { get; set; } = null;
         public Sprite sprite { get; set; }
@@ -79,6 +81,25 @@ public class RoomScript : PublicClasses
         RefreshDisplay();
     }
 
+    public void GenerateStaircase()
+    {
+        // Place staircase in a random location (but not center where enemy spawns)
+        int staircaseX, staircaseY;
+        do
+        {
+            staircaseX = Random.Range(1, ROOMSIZEX - 1);
+            staircaseY = Random.Range(1, ROOMSIZEY - 1);
+        } while (staircaseX == ROOMSIZEX / 2 && staircaseY == ROOMSIZEY / 2);
+
+        TileGrid[staircaseY * ROOMSIZEX + staircaseX].isStaircase = true;
+        TileGrid[staircaseY * ROOMSIZEX + staircaseX].empty = false;
+        if (staircaseSprite != null)
+        {
+            TileGrid[staircaseY * ROOMSIZEX + staircaseX].sprite = staircaseSprite;
+        }
+        RefreshDisplay();
+    }
+
     void RefreshDisplay()
     {
         for(int i = 0; i < ROOMSIZEX * ROOMSIZEY; i++)
@@ -96,12 +117,12 @@ public class RoomScript : PublicClasses
             {
                 GameObject o = Instantiate(TilePrefab, transform);
                 o.GetComponent<SpriteRenderer>().enabled = true;
-                o.GetComponent<SpriteRenderer>().sprite = TileGrid[y * ROOMSIZEY + x].sprite;
+                o.GetComponent<SpriteRenderer>().sprite = TileGrid[y * ROOMSIZEX + x].sprite;
                 Location loc = GetTileLocation(x, y);
                 o.transform.localPosition = new Vector3(loc.x, loc.y, 1f);
                 displayTiles.Add(o);
 
-                if(TileGrid[y * ROOMSIZEY + x].dangerTimer > 0)
+                if(TileGrid[y * ROOMSIZEX + x].dangerTimer > 0)
                 {
                     GameObject dan = Instantiate(dangerPrefab, transform);
                     dan.GetComponent<SpriteRenderer>().enabled = true;
@@ -118,13 +139,13 @@ public class RoomScript : PublicClasses
         {
             for (int x = 0; x < ROOMSIZEX; x++)
             {
-                if (TileGrid[y * ROOMSIZEY + x].player && TileGrid[y * ROOMSIZEY + x].dangerTimer == 1)
+                if (TileGrid[y * ROOMSIZEX + x].player && TileGrid[y * ROOMSIZEX + x].dangerTimer == 1)
                 {
                     player.TakeDamage(1);
                 }
-                if(TileGrid[y * ROOMSIZEY + x].dangerTimer != 0)
+                if(TileGrid[y * ROOMSIZEX + x].dangerTimer != 0)
                 {
-                    TileGrid[y * ROOMSIZEY + x].dangerTimer--;
+                    TileGrid[y * ROOMSIZEX + x].dangerTimer--;
                 }
             }
         }
@@ -136,35 +157,39 @@ public class RoomScript : PublicClasses
 
     public void UpdateTile(int x, int y, bool empty = true, bool player = false, bool blockade = false, bool inDanger = false, GameObject attachedObject = null)
     {
-        TileGrid[y * ROOMSIZEY + x].empty = empty;
-        TileGrid[y * ROOMSIZEY + x].player = player;
-        TileGrid[y * ROOMSIZEY + x].blockade = blockade;
-        TileGrid[y * ROOMSIZEY + x].inDanger = inDanger;
-        TileGrid[y * ROOMSIZEY + x].attachedObject = attachedObject;
+        // Don't override staircase tiles
+        if (!TileGrid[y * ROOMSIZEX + x].isStaircase)
+        {
+            TileGrid[y * ROOMSIZEX + x].empty = empty;
+        }
+        TileGrid[y * ROOMSIZEX + x].player = player;
+        TileGrid[y * ROOMSIZEX + x].blockade = blockade;
+        TileGrid[y * ROOMSIZEX + x].inDanger = inDanger;
+        TileGrid[y * ROOMSIZEX + x].attachedObject = attachedObject;
     }
     public void SetTileDanger(int x, int y, int dangerTimer)
     {
-        if(TileGrid[y * ROOMSIZEY + x].dangerTimer == 0)
+        if(TileGrid[y * ROOMSIZEX + x].dangerTimer == 0)
         {
-            TileGrid[y * ROOMSIZEY + x].dangerTimer = dangerTimer;
+            TileGrid[y * ROOMSIZEX + x].dangerTimer = dangerTimer;
         }
-        else if(TileGrid[y * ROOMSIZEY + x].dangerTimer > dangerTimer)
+        else if(TileGrid[y * ROOMSIZEX + x].dangerTimer > dangerTimer)
         {
-            TileGrid[y * ROOMSIZEY + x].dangerTimer = dangerTimer;
+            TileGrid[y * ROOMSIZEX + x].dangerTimer = dangerTimer;
         }
     }
     public void AttachGameObject(int x, int y, GameObject obj)
     {
-        TileGrid[y * ROOMSIZEY + x].attachedObject = obj;
+        TileGrid[y * ROOMSIZEX + x].attachedObject = obj;
     }
 
     public void ResetTile(int x, int y)
     {
-        TileGrid[y * ROOMSIZEY + x].empty = true;
-        TileGrid[y * ROOMSIZEY + x].player = false;
-        TileGrid[y * ROOMSIZEY + x].blockade = false;
-        TileGrid[y * ROOMSIZEY + x].inDanger = false;
-        TileGrid[y * ROOMSIZEY + x].attachedObject = null;
+        TileGrid[y * ROOMSIZEX + x].empty = true;
+        TileGrid[y * ROOMSIZEX + x].player = false;
+        TileGrid[y * ROOMSIZEX + x].blockade = false;
+        TileGrid[y * ROOMSIZEX + x].inDanger = false;
+        TileGrid[y * ROOMSIZEX + x].attachedObject = null;
     }
 
     public Location GetTileLocation(int x , int y)
@@ -191,7 +216,7 @@ public class RoomScript : PublicClasses
             }
             else return false;
         }
-        if (!TileGrid[y * ROOMSIZEY + x - 1].empty) return false;
+        if (!TileGrid[y * ROOMSIZEX + x - 1].empty) return false;
         return true;
     }
     public bool MoveRight(int x, int y)
@@ -205,7 +230,7 @@ public class RoomScript : PublicClasses
             }
             else return false;
         }
-        if (!TileGrid[y * ROOMSIZEY + x + 1].empty) return false;
+        if (!TileGrid[y * ROOMSIZEX + x + 1].empty) return false;
         return true;
     }
     public bool MoveUp(int x, int y)
@@ -219,7 +244,7 @@ public class RoomScript : PublicClasses
             }
             else return false;
         }
-        if (!TileGrid[(y - 1) * ROOMSIZEY + x].empty) return false;
+        if (!TileGrid[(y - 1) * ROOMSIZEX + x].empty) return false;
         return true;
     }
     public bool MoveDown(int x, int y)
@@ -233,7 +258,7 @@ public class RoomScript : PublicClasses
             }
             else return false;
         }
-        if (!TileGrid[(y + 1) * ROOMSIZEY + x].empty) return false;
+        if (!TileGrid[(y + 1) * ROOMSIZEX + x].empty) return false;
         return true;
     }
     public bool CheckIfMoveToNewRoom(int x, int y)
@@ -243,5 +268,10 @@ public class RoomScript : PublicClasses
             return true;
         }
         return false;
+    }
+
+    public bool IsStaircase(int x, int y)
+    {
+        return TileGrid[y * ROOMSIZEX + x].isStaircase;
     }
 }

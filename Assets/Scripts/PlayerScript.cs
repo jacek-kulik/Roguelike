@@ -31,6 +31,16 @@ public class PlayerScript : PublicClasses
     {
         if (playerTurn)
         {
+            // Check for staircase interaction first (independent of other inputs)
+            if (Input.GetKeyDown("e") || Input.GetKeyDown(KeyCode.Return))
+            {
+                // Check if player is on a staircase
+                if (attachedRoom.GetComponent<RoomScript>().IsStaircase(x, y))
+                {
+                    roomManager.GetComponent<RoomManager>().DescendToNextFloor();
+                }
+            }
+
             if(Input.GetKeyDown("d")){
                 if (attachedRoom.GetComponent<RoomScript>().MoveRight(x, y))
                 {
