@@ -71,15 +71,17 @@ public class PublicClasses : MonoBehaviour
 
     public class Room
     {
-        public Room(int xLoc, int yLoc, GameObject obj, Connections connections)
+        public Room(int xLoc, int yLoc, GameObject obj, Connections connections, int floorNum = 0)
         {
             x = xLoc;
             y = yLoc;
             room = obj;
             con = connections;
+            floor = floorNum;
         }
         public int x { get; set; }
         public int y { get; set; }
+        public int floor { get; set; }
         public GameObject room { get; set; }
         public Connections con { get; set; }
     }

@@ -8,6 +8,7 @@ public class RoomScript : PublicClasses
     public int ROOMSIZEY = 7;
 
     public Sprite emptyCellSprite;
+    public Sprite staircaseSprite;
 
     public GameObject TilePrefab;
     public GameObject dangerPrefab;
@@ -31,6 +32,7 @@ public class RoomScript : PublicClasses
         public bool player { get; set; } = false;
         public bool blockade { get; set; } = false;
         public bool inDanger { get; set; } = false;
+        public bool isStaircase { get; set; } = false;
         public int dangerTimer { get; set; } = 0;
         public GameObject attachedObject { get; set; } = null;
         public Sprite sprite { get; set; }
@@ -75,6 +77,25 @@ public class RoomScript : PublicClasses
             Location loc = GetTileLocation(ROOMSIZEX / 2, ROOMSIZEY / 2);
             o.transform.position = new Vector2(loc.x, loc.y);
             enemies.Add(o);
+        }
+        RefreshDisplay();
+    }
+
+    public void GenerateStaircase()
+    {
+        // Place staircase in a random location (but not center where enemy spawns)
+        int staircaseX, staircaseY;
+        do
+        {
+            staircaseX = Random.Range(1, ROOMSIZEX - 1);
+            staircaseY = Random.Range(1, ROOMSIZEY - 1);
+        } while (staircaseX == ROOMSIZEX / 2 && staircaseY == ROOMSIZEY / 2);
+
+        TileGrid[staircaseY * ROOMSIZEY + staircaseX].isStaircase = true;
+        TileGrid[staircaseY * ROOMSIZEY + staircaseX].empty = false;
+        if (staircaseSprite != null)
+        {
+            TileGrid[staircaseY * ROOMSIZEY + staircaseX].sprite = staircaseSprite;
         }
         RefreshDisplay();
     }
@@ -136,7 +157,11 @@ public class RoomScript : PublicClasses
 
     public void UpdateTile(int x, int y, bool empty = true, bool player = false, bool blockade = false, bool inDanger = false, GameObject attachedObject = null)
     {
-        TileGrid[y * ROOMSIZEY + x].empty = empty;
+        // Don't override staircase tiles
+        if (!TileGrid[y * ROOMSIZEY + x].isStaircase)
+        {
+            TileGrid[y * ROOMSIZEY + x].empty = empty;
+        }
         TileGrid[y * ROOMSIZEY + x].player = player;
         TileGrid[y * ROOMSIZEY + x].blockade = blockade;
         TileGrid[y * ROOMSIZEY + x].inDanger = inDanger;
@@ -243,5 +268,10 @@ public class RoomScript : PublicClasses
             return true;
         }
         return false;
+    }
+
+    public bool IsStaircase(int x, int y)
+    {
+        return TileGrid[y * ROOMSIZEY + x].isStaircase;
     }
 }

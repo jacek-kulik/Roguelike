@@ -79,6 +79,14 @@ public class PlayerScript : PublicClasses
             {
                 Attack(3);
             }
+            else if (Input.GetKeyDown("e") || Input.GetKeyDown(KeyCode.Return))
+            {
+                // Check if player is on a staircase
+                if (attachedRoom.GetComponent<RoomScript>().IsStaircase(x, y))
+                {
+                    roomManager.GetComponent<RoomManager>().DescendToNextFloor();
+                }
+            }
         }
     }
 
